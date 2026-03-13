@@ -1,0 +1,93 @@
+version: '3.9'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Production compose overlay
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Assumptions:
+#  - DATABASE_URL and REDIS_URL point to managed services (RDS, ElastiCache)
+#  - Secrets are injected via environment variables or Docker secrets
+#  - TLS is terminated at the load balancer / reverse proxy
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── In production, postgres and redis are managed services ──────────────────
+  # Remove the service definitions below if using RDS + ElastiCache.
+  # Keep them only for self-hosted deployments.
+
+  postgres:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Do NOT expose port in production — only accessible by the app network
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+
+  redis:
+    restart: always
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  app:
+    build:
+      context: .
+      target: production       # Use the production multi-stage image
+    restart: always
+    environment:
+      NODE_ENV: production
+    # No source volume mounts in production
+    volumes: []
+    command: node dist/main
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    # Run migrations before starting the app
+    # Uncomment if you use a one-off migration container instead:
+    # entrypoint: ["/bin/sh", "-c", "node dist/data-source.js && node dist/main"]
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '50m'
+        max-file: '5'
+
+  # ── Optional: one-off migration runner ──────────────────────────────────────
+  # docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm migrate
+  migrate:
+    build:
+      context: .
+      target: production
+    environment:
+      NODE_ENV: production
+    command: node -e "require('./dist/data-source').AppDataSource.initialize().then(ds => ds.runMigrations()).then(() => process.exit(0)).catch(e => { console.error(e); process.exit(1); })"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+  redis_data:

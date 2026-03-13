@@ -1,0 +1,69 @@
+version: '3.9'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Development compose — hot reload, exposed ports, no resource limits
+# For production see docker-compose.prod.yml
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: salesagent-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: salesagent
+      POSTGRES_PASSWORD: salesagent
+      POSTGRES_DB: salesagent
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U salesagent']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: salesagent-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      target: builder          # Use builder stage for dev (has ts-node, etc.)
+    container_name: salesagent-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://salesagent:salesagent@postgres:5432/salesagent
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3000:3000'
+      - '9229:9229'            # Node.js debugger
+    volumes:
+      - ./src:/app/src         # Hot reload source
+      - /app/node_modules      # Prevent host node_modules from overriding container
+    command: npm run start:dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
