@@ -111,6 +111,7 @@ export class ConversationsService {
   ): Promise<[Conversation[], number]> {
     const qb = this.convRepo
       .createQueryBuilder('c')
+      .leftJoinAndMapOne('c.lead', Lead, 'l', 'l.conversation_id = c.id AND l.tenant_id = :tenantId', { tenantId })
       .where('c.tenant_id = :tenantId', { tenantId })
       .orderBy('c.created_at', 'DESC')
       .skip((pagination.page - 1) * pagination.limit)
