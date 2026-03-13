@@ -16,10 +16,12 @@ import { Lead } from '../../leads/entities/lead.entity';
 const ALLOWED_TRANSITIONS: Record<ConversationStage, ConversationStage[]> = {
   [ConversationStage.GREETING]: [
     ConversationStage.DISCOVERY,
+    ConversationStage.QUALIFICATION,   // skip discovery for visitors who open with BANT signals
     ConversationStage.FOLLOW_UP,
   ],
   [ConversationStage.DISCOVERY]: [
     ConversationStage.QUALIFICATION,
+    ConversationStage.RECOMMENDATION,  // skip qualification for visitors who are clearly ready
     ConversationStage.FOLLOW_UP,
   ],
   [ConversationStage.QUALIFICATION]: [
@@ -142,17 +144,35 @@ export class StageStateMachineService {
    * Infer the most appropriate stage from lead data when no explicit
    * TransitionStage skill was called. Acts as a safety net so stage always
    * reflects the conversation reality after skill side-effects accumulate.
+   *
+   * Priority: explicit LLM transition call > inference. This only fires when
+   * the LLM forgot to call TransitionStage but data indicates the stage changed.
    */
   inferStageFromLead(current: ConversationStage, lead: Lead | null): ConversationStage {
     if (!lead) return current;
 
     const score = lead.score ?? 0;
+    const hasContact = !!(lead.email || lead.firstName || lead.phone);
+    const hasBANT = !!(
+      lead.qualificationData?.budget ||
+      lead.qualificationData?.need ||
+      lead.qualificationData?.authority ||
+      lead.qualificationData?.timeline
+    );
 
-    if (current === ConversationStage.GREETING && (lead.email || lead.firstName)) {
+    // Greeting → Discovery: visitor has given their name or any contact detail
+    if (current === ConversationStage.GREETING && hasContact) {
       return ConversationStage.DISCOVERY;
     }
-    if (current === ConversationStage.DISCOVERY && score >= MIN_SCORE_FOR_RECOMMENDATION) {
+
+    // Discovery → Qualification: some BANT data has been captured
+    if (current === ConversationStage.DISCOVERY && (hasBANT || score >= 10)) {
       return ConversationStage.QUALIFICATION;
+    }
+
+    // Qualification → Recommendation: enough BANT score
+    if (current === ConversationStage.QUALIFICATION && score >= MIN_SCORE_FOR_RECOMMENDATION) {
+      return ConversationStage.RECOMMENDATION;
     }
 
     return current;
