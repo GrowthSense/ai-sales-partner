@@ -58,7 +58,7 @@ export default function Layout() {
             >
               {({ isActive }) => (
                 <>
-                  <span style={{ ...styles.linkIcon, color: isActive ? '#29abe2' : '#94a3b8' }}>
+                  <span style={{ ...styles.linkIcon, color: isActive ? '#29abe2' : 'rgba(255,255,255,0.45)' }}>
                     {item.icon}
                   </span>
                   <span>{item.label}</span>
