@@ -109,34 +109,47 @@ export class ConversationsService {
     filters: ConversationFilters,
     pagination: ConversationPagination,
   ): Promise<[Conversation[], number]> {
-    const qb = this.convRepo
-      .createQueryBuilder('c')
-      .leftJoinAndMapOne('c.lead', Lead, 'l', 'l.conversation_id = c.id AND l.tenant_id = :tenantId', { tenantId })
-      .where('c.tenant_id = :tenantId', { tenantId })
+    // Build a reusable filter helper — TypeORM's getManyAndCount() crashes when
+    // leftJoinAndMapOne (raw table name) is combined with skip/take pagination,
+    // so we run count and data as two separate queries.
+    const applyFilters = (qb: ReturnType<typeof this.convRepo.createQueryBuilder>) => {
+      if (filters.status) qb.andWhere('c.status = :status', { status: filters.status });
+      if (filters.stage) qb.andWhere('c.current_stage = :stage', { stage: filters.stage });
+      if (filters.agentId) qb.andWhere('c.agent_id = :agentId', { agentId: filters.agentId });
+      if (filters.visitorId) qb.andWhere('c.visitor_id = :visitorId', { visitorId: filters.visitorId });
+      if (filters.from) qb.andWhere('c.created_at >= :from', { from: filters.from });
+      if (filters.to) qb.andWhere('c.created_at <= :to', { to: filters.to });
+      return qb;
+    };
+
+    const baseQb = () =>
+      applyFilters(
+        this.convRepo.createQueryBuilder('c').where('c.tenant_id = :tenantId', { tenantId }),
+      );
+
+    const total = await baseQb().getCount();
+
+    // TypeORM crashes when leftJoinAndMapOne (raw table) is combined with skip/take
+    // because its internal pagination subquery can't resolve the joined alias metadata.
+    // Workaround: paginate with a plain ID query, then load full rows + join by ID.
+    const rawIds = await baseQb()
+      .select('c.id', 'id')
       .orderBy('c.created_at', 'DESC')
-      .skip((pagination.page - 1) * pagination.limit)
-      .take(pagination.limit);
+      .limit(pagination.limit)
+      .offset((pagination.page - 1) * pagination.limit)
+      .getRawMany<{ id: string }>();
 
-    if (filters.status) {
-      qb.andWhere('c.status = :status', { status: filters.status });
-    }
-    if (filters.stage) {
-      qb.andWhere('c.current_stage = :stage', { stage: filters.stage });
-    }
-    if (filters.agentId) {
-      qb.andWhere('c.agent_id = :agentId', { agentId: filters.agentId });
-    }
-    if (filters.visitorId) {
-      qb.andWhere('c.visitor_id = :visitorId', { visitorId: filters.visitorId });
-    }
-    if (filters.from) {
-      qb.andWhere('c.created_at >= :from', { from: filters.from });
-    }
-    if (filters.to) {
-      qb.andWhere('c.created_at <= :to', { to: filters.to });
-    }
+    if (rawIds.length === 0) return [[], total];
 
-    return qb.getManyAndCount();
+    const ids = rawIds.map((r) => r.id);
+    const items = await this.convRepo
+      .createQueryBuilder('c')
+      .leftJoinAndMapOne('c.lead', 'leads', 'l', 'l.conversation_id = c.id AND l.tenant_id = :tenantId', { tenantId })
+      .where('c.id IN (:...ids)', { ids, tenantId })
+      .orderBy('c.created_at', 'DESC')
+      .getMany();
+
+    return [items, total];
   }
 
   // ─── Stage & Status ───────────────────────────────────────────────────────
