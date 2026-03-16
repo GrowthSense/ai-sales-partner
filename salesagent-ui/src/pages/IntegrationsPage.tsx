@@ -39,6 +39,40 @@ const INTEGRATIONS = [
     configFields: [],
   },
   {
+    type: 'calendar_google_meet',
+    label: 'Google Meet & Calendar',
+    category: 'Calendar',
+    icon: '🎥',
+    description: 'Let the AI create Google Calendar events with Meet video links when scheduling demos.',
+    docsUrl: 'https://console.cloud.google.com/apis/credentials',
+    oauthHint: 'Requires a Google Cloud project with Calendar API enabled. Get your refresh token from the OAuth 2.0 Playground.',
+    fields: [
+      { key: 'clientId', label: 'OAuth Client ID', placeholder: 'xxxxxxxxxx.apps.googleusercontent.com', type: 'text', required: true, hint: 'Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID' },
+      { key: 'clientSecret', label: 'OAuth Client Secret', placeholder: 'GOCSPX-xxxxxxxxxx', type: 'password', required: true, hint: 'Found alongside the Client ID in Google Cloud Console' },
+      { key: 'refreshToken', label: 'Refresh Token', placeholder: '1//0xxxxxxxxxxxxxxxxxx', type: 'password', required: true, hint: 'Get from OAuth 2.0 Playground → Authorize with scope: https://www.googleapis.com/auth/calendar.events' },
+    ],
+    configFields: [
+      { key: 'calendarId', label: 'Calendar ID', placeholder: 'primary', type: 'text', hint: 'Leave blank to use your primary calendar' },
+    ],
+  },
+  {
+    type: 'calendar_microsoft_teams',
+    label: 'Microsoft Teams',
+    category: 'Calendar',
+    icon: '💼',
+    description: 'Generate Microsoft Teams meeting links automatically when the AI books demos.',
+    docsUrl: 'https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade',
+    oauthHint: 'Requires an Azure AD app registration with OnlineMeetings.ReadWrite.All (application permission).',
+    fields: [
+      { key: 'tenantId', label: 'Azure AD Tenant ID', placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', type: 'text', required: true, hint: 'Azure Portal → Azure Active Directory → Overview → Tenant ID' },
+      { key: 'clientId', label: 'Application (Client) ID', placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', type: 'text', required: true, hint: 'Azure Portal → App registrations → your app → Application ID' },
+      { key: 'clientSecret', label: 'Client Secret', placeholder: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', type: 'password', required: true, hint: 'App registrations → Certificates & secrets → New client secret' },
+    ],
+    configFields: [
+      { key: 'organizerEmail', label: 'Organizer Email', placeholder: 'sales@yourcompany.com', type: 'text', hint: 'The Microsoft 365 user who will be the meeting organizer' },
+    ],
+  },
+  {
     type: 'calendar_calendly',
     label: 'Calendly',
     category: 'Calendar',
@@ -253,11 +287,18 @@ export default function IntegrationsPage() {
                       )}
 
                       {!connected && intDef.docsUrl && (
-                        <div style={styles.docsRow}>
-                          <span style={{ color: '#64748b', fontSize: 12 }}>Need help? </span>
-                          <a href={intDef.docsUrl} target="_blank" rel="noopener noreferrer" style={styles.docsLink}>
-                            View API docs ↗
-                          </a>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {'oauthHint' in intDef && (
+                            <div style={{ padding: '10px 14px', borderRadius: 8, background: '#0284c710', border: '1px solid #0284c730', fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>
+                              ℹ️ {(intDef as any).oauthHint}
+                            </div>
+                          )}
+                          <div style={styles.docsRow}>
+                            <span style={{ color: '#64748b', fontSize: 12 }}>Setup guide: </span>
+                            <a href={intDef.docsUrl} target="_blank" rel="noopener noreferrer" style={styles.docsLink}>
+                              Open console ↗
+                            </a>
+                          </div>
                         </div>
                       )}
 
