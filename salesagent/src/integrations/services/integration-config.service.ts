@@ -23,6 +23,18 @@ export interface CalendarCredentials {
   apiKey: string;
 }
 
+export interface GoogleMeetCredentials {
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+}
+
+export interface MicrosoftTeamsCredentials {
+  tenantId: string;
+  clientId: string;
+  clientSecret: string;
+}
+
 export interface EmailCredentials {
   host: string;
   port: number;
@@ -40,6 +52,8 @@ type IntegrationCredentialMap = {
   [IntegrationType.CRM_SALESFORCE]: CrmCredentials;
   [IntegrationType.CALENDAR_CALENDLY]: CalendarCredentials;
   [IntegrationType.CALENDAR_CALCOM]: CalendarCredentials;
+  [IntegrationType.CALENDAR_GOOGLE_MEET]: GoogleMeetCredentials;
+  [IntegrationType.CALENDAR_MICROSOFT_TEAMS]: MicrosoftTeamsCredentials;
   [IntegrationType.EMAIL_SMTP]: EmailCredentials;
   [IntegrationType.WEBHOOK]: WebhookCredentials;
 };

@@ -11,6 +11,8 @@ import { IntegrationConfigService } from './integration-config.service';
 import { CrmIntegrationService } from './crm-integration.service';
 import { CalendarIntegrationService } from './calendar-integration.service';
 import { EmailIntegrationService } from './email-integration.service';
+import { GoogleMeetClient } from '../calendar/google-meet/google-meet.client';
+import { MicrosoftTeamsClient } from '../calendar/microsoft-teams/microsoft-teams.client';
 
 /**
  * AdminIntegrationService
@@ -34,6 +36,8 @@ export class AdminIntegrationService {
     private readonly crmService: CrmIntegrationService,
     private readonly calendarService: CalendarIntegrationService,
     private readonly emailService: EmailIntegrationService,
+    private readonly googleMeet: GoogleMeetClient,
+    private readonly microsoftTeams: MicrosoftTeamsClient,
   ) {}
 
   // ─── List ─────────────────────────────────────────────────────────────────
@@ -122,6 +126,28 @@ export class AdminIntegrationService {
         case IntegrationType.CALENDAR_CALENDLY:
         case IntegrationType.CALENDAR_CALCOM: {
           ok = await this.configService.isConnected(tenantId, type);
+          break;
+        }
+        case IntegrationType.CALENDAR_GOOGLE_MEET: {
+          const { credentials } = await this.configService.getConfigAndCredentials(tenantId, type);
+          ok = await this.googleMeet.testConnection({
+            provider: 'google_meet',
+            apiKey: credentials.refreshToken as string,
+            clientId: credentials.clientId as string,
+            clientSecret: credentials.clientSecret as string,
+            refreshToken: credentials.refreshToken as string,
+          });
+          break;
+        }
+        case IntegrationType.CALENDAR_MICROSOFT_TEAMS: {
+          const { record, credentials } = await this.configService.getConfigAndCredentials(tenantId, type);
+          ok = await this.microsoftTeams.testConnection({
+            provider: 'microsoft_teams',
+            apiKey: credentials.clientSecret as string,
+            clientId: credentials.clientId as string,
+            tenantId: credentials.tenantId as string,
+            organizerEmail: record.config['organizerEmail'] as string | undefined,
+          });
           break;
         }
         case IntegrationType.EMAIL_SMTP: {

@@ -31,6 +31,8 @@ export enum IntegrationType {
   CRM_SALESFORCE = 'crm_salesforce',
   CALENDAR_CALENDLY = 'calendar_calendly',
   CALENDAR_CALCOM = 'calendar_calcom',
+  CALENDAR_GOOGLE_MEET = 'calendar_google_meet',
+  CALENDAR_MICROSOFT_TEAMS = 'calendar_microsoft_teams',
   EMAIL_SMTP = 'email_smtp',
   WEBHOOK = 'webhook',
 }

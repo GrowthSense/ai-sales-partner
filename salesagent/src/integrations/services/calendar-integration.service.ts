@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { IntegrationConfigService } from './integration-config.service';
 import { CalendlyClient } from '../calendar/calendly/calendly.client';
 import { CalcomClient } from '../calendar/calcom/calcom.client';
+import { GoogleMeetClient } from '../calendar/google-meet/google-meet.client';
+import { MicrosoftTeamsClient } from '../calendar/microsoft-teams/microsoft-teams.client';
 import { MockCalendarClient } from '../calendar/mock/mock-calendar.client';
 import { ICalendarAdapter, CalendarConfig, BookingOptions, TimeSlot } from '../interfaces/calendar-adapter.interface';
 import { IntegrationType } from '../../common/enums';
@@ -20,6 +22,8 @@ export class CalendarIntegrationService {
     private readonly configService: IntegrationConfigService,
     private readonly calendly: CalendlyClient,
     private readonly calcom: CalcomClient,
+    private readonly googleMeet: GoogleMeetClient,
+    private readonly microsoftTeams: MicrosoftTeamsClient,
     private readonly mockCalendar: MockCalendarClient,
   ) {}
 
@@ -78,6 +82,45 @@ export class CalendarIntegrationService {
           apiKey: credentials.apiKey,
           eventTypeId: record.config['eventTypeId'] as string | undefined,
           username: record.config['username'] as string | undefined,
+        },
+      };
+    }
+
+    const hasGoogleMeet = await this.configService.isConnected(tenantId, IntegrationType.CALENDAR_GOOGLE_MEET);
+    if (hasGoogleMeet) {
+      const { record, credentials } = await this.configService.getConfigAndCredentials(
+        tenantId,
+        IntegrationType.CALENDAR_GOOGLE_MEET,
+      );
+      return {
+        name: 'google_meet',
+        adapter: this.googleMeet,
+        config: {
+          provider: 'google_meet',
+          apiKey: credentials.refreshToken as string,
+          clientId: credentials.clientId as string,
+          clientSecret: credentials.clientSecret as string,
+          refreshToken: credentials.refreshToken as string,
+          calendarId: record.config['calendarId'] as string | undefined,
+        },
+      };
+    }
+
+    const hasTeams = await this.configService.isConnected(tenantId, IntegrationType.CALENDAR_MICROSOFT_TEAMS);
+    if (hasTeams) {
+      const { record, credentials } = await this.configService.getConfigAndCredentials(
+        tenantId,
+        IntegrationType.CALENDAR_MICROSOFT_TEAMS,
+      );
+      return {
+        name: 'microsoft_teams',
+        adapter: this.microsoftTeams,
+        config: {
+          provider: 'microsoft_teams',
+          apiKey: credentials.clientSecret as string,
+          clientId: credentials.clientId as string,
+          tenantId: credentials.tenantId as string,
+          organizerEmail: record.config['organizerEmail'] as string | undefined,
         },
       };
     }

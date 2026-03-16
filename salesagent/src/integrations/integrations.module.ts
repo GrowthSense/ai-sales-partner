@@ -18,6 +18,8 @@ import { MockCrmClient } from './crm/mock/mock-crm.client';
 // Calendar adapters
 import { CalendlyClient } from './calendar/calendly/calendly.client';
 import { CalcomClient } from './calendar/calcom/calcom.client';
+import { GoogleMeetClient } from './calendar/google-meet/google-meet.client';
+import { MicrosoftTeamsClient } from './calendar/microsoft-teams/microsoft-teams.client';
 import { MockCalendarClient } from './calendar/mock/mock-calendar.client';
 
 // Email adapter
@@ -77,6 +79,8 @@ import { QUEUE_NAMES } from '../common/types/queue-jobs.types';
     // Calendar
     CalendlyClient,
     CalcomClient,
+    GoogleMeetClient,
+    MicrosoftTeamsClient,
     MockCalendarClient,
     CalendarIntegrationService,
 

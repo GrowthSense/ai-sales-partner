@@ -4,10 +4,18 @@ export interface ICalendarAdapter {
 }
 
 export interface CalendarConfig {
-  provider: 'calendly' | 'calcom';
+  provider: 'calendly' | 'calcom' | 'google_meet' | 'microsoft_teams';
   apiKey: string;
   eventTypeId?: string;
   username?: string;
+  // Google Meet
+  clientId?: string;
+  clientSecret?: string;
+  refreshToken?: string;
+  calendarId?: string;
+  // Microsoft Teams
+  tenantId?: string;
+  organizerEmail?: string;
 }
 
 export interface BookingOptions {
