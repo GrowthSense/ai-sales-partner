@@ -67,13 +67,17 @@ export default function ConversationsPage() {
   const [messagesLoading, setMessagesLoading] = useState(false);
   const limit = 15;
 
+  const [error, setError] = useState<string | null>(null);
+
   const load = () => {
     setLoading(true);
+    setError(null);
     const params: any = { page, limit };
     if (statusFilter) params.status = statusFilter;
     if (stageFilter) params.stage = stageFilter;
     api.get('/conversations', { params })
       .then((r) => { setConversations(r.data.items ?? r.data); setTotal(r.data.total ?? 0); })
+      .catch((e) => setError(e.response?.data?.message ?? 'Failed to load conversations'))
       .finally(() => setLoading(false));
   };
 
@@ -116,6 +120,13 @@ export default function ConversationsPage() {
 
       {loading ? (
         <div style={styles.empty}>Loading…</div>
+      ) : error ? (
+        <div style={styles.emptyState}>
+          <div style={styles.emptyIcon}>⚠️</div>
+          <div style={styles.emptyTitle}>Could not load conversations</div>
+          <div style={styles.emptySub}>{error}</div>
+          <button onClick={load} style={{ marginTop: 12, padding: '8px 20px', borderRadius: 8, border: '1px solid #e0f2fe', background: '#f8fafc', color: '#0284c7', cursor: 'pointer', fontSize: 13 }}>Retry</button>
+        </div>
       ) : conversations.length === 0 ? (
         <div style={styles.emptyState}>
           <div style={styles.emptyIcon}>💬</div>

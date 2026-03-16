@@ -12,6 +12,11 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Notify the app that the session has expired so it can show a toast before redirecting
+function notifySessionExpired() {
+  window.dispatchEvent(new CustomEvent('session:expired'));
+}
+
 // Auto-refresh on 401
 api.interceptors.response.use(
   (res) => res,
@@ -22,16 +27,17 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
         try {
-          const { data } = await axios.post('http://localhost:3000/api/v1/auth/refresh', { refreshToken });
+          const { data } = await axios.post('http://localhost:3020/api/v1/auth/refresh', { refreshToken });
           localStorage.setItem('accessToken', data.accessToken);
           original.headers.Authorization = `Bearer ${data.accessToken}`;
           return api(original);
         } catch {
           localStorage.clear();
-          window.location.href = '/login';
+          notifySessionExpired();
         }
       } else {
-        window.location.href = '/login';
+        localStorage.clear();
+        notifySessionExpired();
       }
     }
     return Promise.reject(err);
