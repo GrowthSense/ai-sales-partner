@@ -43,6 +43,11 @@ export interface EmailCredentials {
   secure: boolean;
 }
 
+export interface WhatsAppCredentials {
+  accessToken: string;
+  verifyToken?: string;
+}
+
 export interface WebhookCredentials {
   signingSecret?: string;
 }
@@ -54,6 +59,7 @@ type IntegrationCredentialMap = {
   [IntegrationType.CALENDAR_CALCOM]: CalendarCredentials;
   [IntegrationType.CALENDAR_GOOGLE_MEET]: GoogleMeetCredentials;
   [IntegrationType.CALENDAR_MICROSOFT_TEAMS]: MicrosoftTeamsCredentials;
+  [IntegrationType.WHATSAPP_BUSINESS]: WhatsAppCredentials;
   [IntegrationType.EMAIL_SMTP]: EmailCredentials;
   [IntegrationType.WEBHOOK]: WebhookCredentials;
 };

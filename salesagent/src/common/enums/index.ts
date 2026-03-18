@@ -33,6 +33,7 @@ export enum IntegrationType {
   CALENDAR_CALCOM = 'calendar_calcom',
   CALENDAR_GOOGLE_MEET = 'calendar_google_meet',
   CALENDAR_MICROSOFT_TEAMS = 'calendar_microsoft_teams',
+  WHATSAPP_BUSINESS = 'whatsapp_business',
   EMAIL_SMTP = 'email_smtp',
   WEBHOOK = 'webhook',
 }

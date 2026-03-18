@@ -23,6 +23,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { SocialMediaModule } from './social-media/social-media.module';
+import { WhatsAppModule } from './whatsapp/whatsapp.module';
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { SocialMediaModule } from './social-media/social-media.module';
     WebsocketModule,
     AnalyticsModule,
     SocialMediaModule,
+    WhatsAppModule,
   ],
   providers: [
     // ─── Global guards ────────────────────────────────────────────────────────
