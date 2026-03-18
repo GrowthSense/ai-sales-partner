@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/auth.store';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
@@ -21,10 +21,13 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function SessionExpiredToast() {
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const logout = useAuthStore((s) => s.logout);
 
   useEffect(() => {
     const handle = () => {
+      // Don't show the toast if the user is already on the login page
+      if (window.location.pathname === '/login') return;
       logout();
       setVisible(true);
       setTimeout(() => {
@@ -36,7 +39,7 @@ function SessionExpiredToast() {
     return () => window.removeEventListener('session:expired', handle);
   }, []);
 
-  if (!visible) return null;
+  if (!visible || location.pathname === '/login') return null;
 
   return (
     <div style={{
