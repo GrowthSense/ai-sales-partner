@@ -12,6 +12,23 @@ interface Integration {
 
 const INTEGRATIONS = [
   {
+    type: 'whatsapp_business',
+    label: 'WhatsApp Business',
+    category: 'Messaging',
+    icon: '💬',
+    description: 'Let your AI agent talk to leads directly on WhatsApp — the #1 channel in Zimbabwe.',
+    docsUrl: 'https://developers.facebook.com/docs/whatsapp/cloud-api/get-started',
+    oauthHint: 'Requires a Meta Business account with WhatsApp Business API enabled. Free tier supports up to 1,000 conversations/month.',
+    fields: [
+      { key: 'accessToken', label: 'Permanent Access Token', placeholder: 'EAAxxxxxxxxxx...', type: 'password', required: true, hint: 'Meta Business Suite → WhatsApp → API Setup → Permanent Token (never expires)' },
+      { key: 'verifyToken', label: 'Webhook Verify Token', placeholder: 'my-secret-verify-token', type: 'text', required: false, hint: 'A secret string you choose — used to verify the webhook URL with Meta' },
+    ],
+    configFields: [
+      { key: 'phoneNumberId', label: 'Phone Number ID', placeholder: '123456789012345', type: 'text', hint: 'Found in Meta Business Suite → WhatsApp → API Setup → Phone Number ID' },
+      { key: 'businessAccountId', label: 'Business Account ID', placeholder: '123456789012345', type: 'text', hint: 'WhatsApp Business Account ID (optional — used for analytics)' },
+    ],
+  },
+  {
     type: 'crm_hubspot',
     label: 'HubSpot CRM',
     category: 'CRM',
@@ -121,6 +138,7 @@ const INTEGRATIONS = [
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
+  Messaging: '#25d366',
   CRM: '#f59e0b',
   Calendar: '#10b981',
   Email: '#3b82f6',
