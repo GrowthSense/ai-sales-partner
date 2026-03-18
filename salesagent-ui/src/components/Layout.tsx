@@ -1,6 +1,5 @@
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth.store';
-import { useState, useEffect } from 'react';
 
 // ── GrowthSense brand tokens ──────────────────────────────────────────────────
 // Navy  : #2e3191   Bright blue : #29abe2
@@ -19,28 +18,10 @@ const navItems = [
 
 const demoItem = { to: '/demo', label: 'Live Demo', icon: '▶' };
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-  return isMobile;
-}
-
 export default function Layout() {
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
-  const location = useLocation();
-  const isMobile = useIsMobile();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Close sidebar on navigation (mobile)
-  useEffect(() => {
-    if (isMobile) setSidebarOpen(false);
-  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -48,126 +29,80 @@ export default function Layout() {
   };
 
   const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : '??';
-  const showSidebar = !isMobile || sidebarOpen;
 
   return (
     <div style={styles.shell}>
-      {/* Mobile top bar */}
-      {isMobile && (
-        <div style={styles.mobileBar}>
-          <button style={styles.hamburger} onClick={() => setSidebarOpen((o) => !o)}>
-            {sidebarOpen ? '✕' : '☰'}
-          </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <img
-              src="/cropped-growthsense-main-logo.png"
-              alt="GrowthSense"
-              style={{ height: 26, width: 'auto', objectFit: 'contain' }}
-            />
-            <span style={{ fontSize: 13, fontWeight: 800, color: '#2e3191' }}>GrowthSense</span>
+      <aside style={styles.sidebar}>
+        {/* Brand */}
+        <div style={styles.brandWrap}>
+          <img
+            src="/cropped-growthsense-main-logo.png"
+            alt="GrowthSense"
+            style={{ height: 36, width: 'auto', objectFit: 'contain', flexShrink: 0 }}
+          />
+          <div style={styles.brandTextWrap}>
+            <div style={styles.brandName}>GrowthSense</div>
+            <div style={styles.brandSub}>AI SALES PARTNER</div>
           </div>
-          <div style={styles.avatar}>{initials}</div>
         </div>
-      )}
 
-      {/* Sidebar overlay (mobile) */}
-      {isMobile && sidebarOpen && (
-        <div
-          style={styles.overlay}
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      {showSidebar && (
-        <aside style={{
-          ...styles.sidebar,
-          ...(isMobile ? styles.sidebarMobile : {}),
-        }}>
-          {/* Brand (desktop only) */}
-          {!isMobile && (
-            <div style={styles.brandWrap}>
-              <img
-                src="/cropped-growthsense-main-logo.png"
-                alt="GrowthSense"
-                style={{ height: 36, width: 'auto', objectFit: 'contain', flexShrink: 0 }}
-              />
-              <div style={styles.brandTextWrap}>
-                <div style={styles.brandName}>GrowthSense</div>
-                <div style={styles.brandSub}>AI SALES PARTNER</div>
-              </div>
-            </div>
-          )}
-
-          {/* Mobile sidebar header */}
-          {isMobile && (
-            <div style={{ ...styles.brandWrap, justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <img src="/cropped-growthsense-main-logo.png" alt="" style={{ height: 28 }} />
-                <div style={styles.brandName}>GrowthSense</div>
-              </div>
-              <button style={styles.hamburger} onClick={() => setSidebarOpen(false)}>✕</button>
-            </div>
-          )}
-
-          {/* Main nav */}
-          <nav style={styles.nav}>
-            <div style={styles.navSection}>MAIN</div>
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}
-              >
-                {({ isActive }) => (
-                  <>
-                    <span style={{ ...styles.linkIcon, color: isActive ? '#29abe2' : 'rgba(46,49,145,0.45)' }}>
-                      {item.icon}
-                    </span>
-                    <span>{item.label}</span>
-                    {isActive && <span style={styles.activeDot} />}
-                  </>
-                )}
-              </NavLink>
-            ))}
-
-            <div style={{ ...styles.navSection, marginTop: 20 }}>TOOLS</div>
+        {/* Main nav */}
+        <nav style={styles.nav}>
+          <div style={styles.navSection}>MAIN</div>
+          {navItems.map((item) => (
             <NavLink
-              to={demoItem.to}
-              style={({ isActive }) => ({
-                ...styles.link,
-                ...styles.demoLink,
-                ...(isActive ? styles.activeDemoLink : {}),
-              })}
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}
             >
               {({ isActive }) => (
                 <>
-                  <span style={{ ...styles.linkIcon, color: isActive ? '#fff' : '#29abe2' }}>
-                    {demoItem.icon}
+                  <span style={{ ...styles.linkIcon, color: isActive ? '#29abe2' : 'rgba(255,255,255,0.45)' }}>
+                    {item.icon}
                   </span>
-                  <span>Live Demo</span>
-                  <span style={styles.livePulse} />
+                  <span>{item.label}</span>
+                  {isActive && <span style={styles.activeDot} />}
                 </>
               )}
             </NavLink>
-          </nav>
+          ))}
 
-          {/* User footer */}
-          <div style={styles.footer}>
-            <div style={styles.userRow}>
-              <div style={styles.avatar}>{initials}</div>
-              <div style={styles.userDetails}>
-                <div style={styles.userEmail}>{user?.email ?? 'Admin'}</div>
-                <div style={styles.userRole}>Administrator</div>
-              </div>
+          <div style={{ ...styles.navSection, marginTop: 20 }}>TOOLS</div>
+          <NavLink
+            to={demoItem.to}
+            style={({ isActive }) => ({
+              ...styles.link,
+              ...styles.demoLink,
+              ...(isActive ? styles.activeDemoLink : {}),
+            })}
+          >
+            {({ isActive }) => (
+              <>
+                <span style={{ ...styles.linkIcon, color: isActive ? '#fff' : '#29abe2' }}>
+                  {demoItem.icon}
+                </span>
+                <span>Live Demo</span>
+                <span style={styles.livePulse} />
+              </>
+            )}
+          </NavLink>
+        </nav>
+
+        {/* User footer */}
+        <div style={styles.footer}>
+          <div style={styles.userRow}>
+            <div style={styles.avatar}>{initials}</div>
+            <div style={styles.userDetails}>
+              <div style={styles.userEmail}>{user?.email ?? 'Admin'}</div>
+              <div style={styles.userRole}>Administrator</div>
             </div>
-            <button style={styles.logoutBtn} onClick={handleLogout}>↩ Sign out</button>
           </div>
-        </aside>
-      )}
+          <button style={styles.logoutBtn} onClick={handleLogout}>↩ Sign out</button>
+        </div>
+      </aside>
 
-      <main style={{ ...styles.main, ...(isMobile ? styles.mainMobile : {}) }}>
+      <main style={styles.main}>
         <Outlet />
       </main>
 
@@ -183,46 +118,18 @@ export default function Layout() {
 
 const styles: Record<string, React.CSSProperties> = {
   shell: {
-    display: 'flex', minHeight: '100vh',
+    display: 'flex', flexDirection: 'row', minHeight: '100vh',
     background: '#f0f8fe', color: '#0f172a',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    flexDirection: 'column',
   },
-
-  // ── Mobile top bar ──────────────────────────────────────────────────────────
-  mobileBar: {
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '0 16px', height: 56,
-    background: '#ffffff', borderBottom: '1px solid #cde8f5',
-    position: 'sticky', top: 0, zIndex: 100,
-    flexShrink: 0,
-  },
-  hamburger: {
-    background: 'none', border: 'none',
-    fontSize: 20, color: '#2e3191', cursor: 'pointer',
-    padding: '4px 8px', borderRadius: 6,
-  },
-  overlay: {
-    position: 'fixed', inset: 0,
-    background: 'rgba(0,0,0,0.4)',
-    zIndex: 199,
-  },
-
-  // ── Sidebar ────────────────────────────────────────────────────────────────
   sidebar: {
     width: 248,
     background: '#ffffff',
     display: 'flex', flexDirection: 'column',
     borderRight: '1px solid #cde8f5',
     flexShrink: 0,
+    position: 'sticky', top: 0, height: '100vh', overflowY: 'auto',
   },
-  sidebarMobile: {
-    position: 'fixed', top: 56, left: 0, bottom: 0,
-    zIndex: 200,
-    boxShadow: '4px 0 24px rgba(0,0,0,0.12)',
-    overflowY: 'auto',
-  },
-
   brandWrap: {
     display: 'flex', alignItems: 'center', gap: 10,
     padding: '20px 16px 18px',
@@ -236,13 +143,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   nav: { flex: 1, padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: 2 },
   navSection: {
-    fontSize: 10, fontWeight: 700, color: '#b8c4d0',
+    fontSize: 10, fontWeight: 700, color: '#b8dff5',
     letterSpacing: 1, textTransform: 'uppercase' as const,
     padding: '6px 10px 4px',
   },
   link: {
     display: 'flex', alignItems: 'center', gap: 10,
-    padding: '10px 12px', borderRadius: 10,
+    padding: '9px 12px', borderRadius: 10,
     color: '#64748b', textDecoration: 'none',
     fontSize: 13, fontWeight: 500,
     transition: 'background 0.15s, color 0.15s',
@@ -292,15 +199,5 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#f8fafc', color: '#64748b',
     fontSize: 12, cursor: 'pointer', fontWeight: 500,
   },
-
-  // ── Main content ───────────────────────────────────────────────────────────
-  main: {
-    flex: 1, overflowY: 'auto', padding: 32,
-    background: '#f0f8fe',
-    display: 'flex', flexDirection: 'column',
-  },
-  mainMobile: {
-    padding: 16,
-    width: '100%',
-  },
+  main: { flex: 1, overflowY: 'auto', padding: 32, background: '#f0f8fe', minWidth: 0 },
 };

@@ -90,34 +90,6 @@ const INTEGRATIONS = [
     ],
   },
   {
-    type: 'calendar_calendly',
-    label: 'Calendly',
-    category: 'Calendar',
-    icon: '📅',
-    description: 'Let the AI agent book demos directly using your Calendly event types.',
-    docsUrl: 'https://developer.calendly.com/api-docs',
-    fields: [
-      { key: 'apiKey', label: 'Personal Access Token', placeholder: 'eyJraWQiOi...', type: 'password', required: true, hint: 'Found in Calendly → Integrations → API & Webhooks' },
-    ],
-    configFields: [
-      { key: 'eventTypeUri', label: 'Event Type URI', placeholder: 'https://api.calendly.com/event_types/xxxxxxxx', type: 'text', hint: 'The specific event type URI for demos (optional — defaults to first available)' },
-    ],
-  },
-  {
-    type: 'calendar_calcom',
-    label: 'Cal.com',
-    category: 'Calendar',
-    icon: '📆',
-    description: 'Use Cal.com for open-source scheduling directly from the AI agent.',
-    docsUrl: 'https://cal.com/docs/enterprise-features/api/api-keys',
-    fields: [
-      { key: 'apiKey', label: 'API Key', placeholder: 'cal_live_xxxxxxxxxx', type: 'password', required: true, hint: 'Settings → Developer → API Keys in your Cal.com account' },
-    ],
-    configFields: [
-      { key: 'eventTypeId', label: 'Event Type ID', placeholder: '12345', type: 'text', hint: 'Numeric ID of your demo event type (optional)' },
-    ],
-  },
-  {
     type: 'email_smtp',
     label: 'SMTP Email',
     category: 'Email',
