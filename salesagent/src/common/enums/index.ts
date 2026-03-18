@@ -29,8 +29,6 @@ export enum TenantMemberStatus {
 export enum IntegrationType {
   CRM_HUBSPOT = 'crm_hubspot',
   CRM_SALESFORCE = 'crm_salesforce',
-  CALENDAR_CALENDLY = 'calendar_calendly',
-  CALENDAR_CALCOM = 'calendar_calcom',
   CALENDAR_GOOGLE_MEET = 'calendar_google_meet',
   CALENDAR_MICROSOFT_TEAMS = 'calendar_microsoft_teams',
   WHATSAPP_BUSINESS = 'whatsapp_business',

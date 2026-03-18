@@ -16,8 +16,6 @@ import { SalesforceClient } from './crm/salesforce/salesforce.client';
 import { MockCrmClient } from './crm/mock/mock-crm.client';
 
 // Calendar adapters
-import { CalendlyClient } from './calendar/calendly/calendly.client';
-import { CalcomClient } from './calendar/calcom/calcom.client';
 import { GoogleMeetClient } from './calendar/google-meet/google-meet.client';
 import { MicrosoftTeamsClient } from './calendar/microsoft-teams/microsoft-teams.client';
 import { MockCalendarClient } from './calendar/mock/mock-calendar.client';
@@ -77,8 +75,6 @@ import { QUEUE_NAMES } from '../common/types/queue-jobs.types';
     CrmIntegrationService,
 
     // Calendar
-    CalendlyClient,
-    CalcomClient,
     GoogleMeetClient,
     MicrosoftTeamsClient,
     MockCalendarClient,

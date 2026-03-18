@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { IntegrationConfigService } from './integration-config.service';
-import { CalendlyClient } from '../calendar/calendly/calendly.client';
-import { CalcomClient } from '../calendar/calcom/calcom.client';
 import { GoogleMeetClient } from '../calendar/google-meet/google-meet.client';
 import { MicrosoftTeamsClient } from '../calendar/microsoft-teams/microsoft-teams.client';
 import { MockCalendarClient } from '../calendar/mock/mock-calendar.client';
@@ -20,8 +18,6 @@ export class CalendarIntegrationService {
 
   constructor(
     private readonly configService: IntegrationConfigService,
-    private readonly calendly: CalendlyClient,
-    private readonly calcom: CalcomClient,
     private readonly googleMeet: GoogleMeetClient,
     private readonly microsoftTeams: MicrosoftTeamsClient,
     private readonly mockCalendar: MockCalendarClient,
@@ -50,42 +46,6 @@ export class CalendarIntegrationService {
     adapter: ICalendarAdapter;
     config: CalendarConfig;
   }> {
-    const hasCalendly = await this.configService.isConnected(tenantId, IntegrationType.CALENDAR_CALENDLY);
-    if (hasCalendly) {
-      const { record, credentials } = await this.configService.getConfigAndCredentials(
-        tenantId,
-        IntegrationType.CALENDAR_CALENDLY,
-      );
-      return {
-        name: 'calendly',
-        adapter: this.calendly,
-        config: {
-          provider: 'calendly',
-          apiKey: credentials.apiKey,
-          eventTypeId: record.config['eventTypeId'] as string | undefined,
-          username: record.config['username'] as string | undefined,
-        },
-      };
-    }
-
-    const hasCalcom = await this.configService.isConnected(tenantId, IntegrationType.CALENDAR_CALCOM);
-    if (hasCalcom) {
-      const { record, credentials } = await this.configService.getConfigAndCredentials(
-        tenantId,
-        IntegrationType.CALENDAR_CALCOM,
-      );
-      return {
-        name: 'calcom',
-        adapter: this.calcom,
-        config: {
-          provider: 'calcom',
-          apiKey: credentials.apiKey,
-          eventTypeId: record.config['eventTypeId'] as string | undefined,
-          username: record.config['username'] as string | undefined,
-        },
-      };
-    }
-
     const hasGoogleMeet = await this.configService.isConnected(tenantId, IntegrationType.CALENDAR_GOOGLE_MEET);
     if (hasGoogleMeet) {
       const { record, credentials } = await this.configService.getConfigAndCredentials(

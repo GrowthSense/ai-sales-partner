@@ -123,11 +123,6 @@ export class AdminIntegrationService {
           ok = await this.configService.isConnected(tenantId, type);
           break;
         }
-        case IntegrationType.CALENDAR_CALENDLY:
-        case IntegrationType.CALENDAR_CALCOM: {
-          ok = await this.configService.isConnected(tenantId, type);
-          break;
-        }
         case IntegrationType.CALENDAR_GOOGLE_MEET: {
           const { credentials } = await this.configService.getConfigAndCredentials(tenantId, type);
           ok = await this.googleMeet.testConnection({
